@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>خوارزمی</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="site-header">
+    <div class="user-info" id="userInfo">
+      <span class="user-icon">👤</span>
+      <span class="user-name" id="userName">کاربر مهمان عزیز خوش آمدید!</span>
+      <span class="user-name" id="userMessage"></span>
+    </div>
+  </div>
+  <div class="container" id="columnsContainer">
+    <div class="column right" data-id="col-1">
+      <h2 id="toggleTodoVisibility" title="نمایش/مخفی کردن تسک‌ها">کارهای روزانه</h2>
+      <div class="todo-container">
+        <div class="todo-input-group">
+          <textarea id="todoInput" placeholder="نوشتن تسک جدید ..."></textarea>
+          <button id="addTodoBtn">➕</button>
+        </div>
+        <ul id="todoList" class="todo-list"></ul>
+      </div>
+    </div>
+
+    <div class="column center" data-id="col-2">
+      <div>
+        <form class=" google-search" action="https://www.google.com/search" method="GET" target="_blank">
+          <input type="text" name="q" placeholder="جستجو در گوگل..." />
+          <button type="submit">🔍</button>
+        </form>
+      </div>
+
+      <h2>لینک‌های سریع</h2>
+      <div id="fixedLinksBox" class="links-section"></div>
+      <div class="icons-box"></div>
+
+      <div class="news-section">
+        <div class="news-header">اخبار شرکت</div>
+        <div id="newsContainer"></div>
+        <div id="pagination" class="pagination"></div>
+      </div>
+    </div>
+
+    <div class="column left" data-id="col-3">
+      <div class="poll-container">
+        <h2>📊 نظرسنجی</h2>
+        <div id="pollLoading" class="poll-loading" style="display: none;">
+          <div class="spinner"></div>
+          <span>در حال بارگذاری...</span>
+        </div>
+
+        <div id="pollList"></div>
+      </div>
+
+      <div id="persian-calendar"></div>
+
+
+
+      <h2>درباره ما</h2>
+      <p>مسئولیت ایجاد و نگهداری بسترهای فنی پایدار، امن و مقیاس‌پذیر را بر عهده دارد؛ بستری که کلیه خدمات و محصولات
+        سازمان بر آن استوار است.
+      </p>
+      <!-- <p>مأموریت ما، طراحی و بهینه‌سازی معماری سیستم‌ها، تضمین تداوم سرویس، و پیش‌بینی نیازهای آینده است.
+      </p>
+      <p>در این حوزه، دقت، انضباط و آینده‌نگری معیار اصلی موفقیت محسوب می‌شود.
+      </p>
+      <p>زیرساخت، ستون فقرات فناوری هر سازمان است؛ هرچه استوارتر، مسیر رشد و نوآوری هموارتر.
+      </p> -->
+    </div>
+  </div>
+
+  <div id="adminLoginModal" class="modal">
+    <div class="modal-content">
+      <h3>🔑 ورود مدیر</h3>
+      <input type="text" id="adminUsername" placeholder="نام کاربری" class="form-control" />
+      <input type="password" id="adminPassword" placeholder="رمز عبور" style="
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+    margin-top: 20px;" />
+
+      <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+        <img id="captchaImage" src="https://localhost:7172/api/Captcha/GetCaptcha" alt="Captcha"
+          style="cursor:pointer;border:1px solid #ccc;height: 37px;width: 250px;" title="برای رفرش کلیک کنید">
+        <input type="text" id="captchaInput" placeholder="کد کپچا" style="flex:1;
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);">
+      </div>
+
+      <button id="adminLoginBtn" style="
+    background: #4CAF50;
+    color: white;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 200px;">ورود</button>
+    </div>
+  </div>
+
+  <div id="adminPanelModal" class="modal admin-modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="adminPanelModal" style="float: left;">&times;</span>
+      <h2>پنل مدیریت <span id="logoutBtn" style="font-size: 12px;cursor: pointer;color: #c50d0d;">(خروج)</span></h2>
+      <div class="tabs">
+        <button class="tab-btn" data-tab="userTab">👤 کاربران</button>
+        <button class="tab-btn" data-tab="roleTab">📌 نقش ها</button>
+        <button class="tab-btn" data-tab="groupingUserTab">👥 کاربران و گروه بندی </button>
+        <button class="tab-btn" data-tab="newsTab">📢 اخبار</button>
+        <button class="tab-btn" data-tab="linksTab">🔗 لینک‌ها</button>
+        <button class="tab-btn" data-tab="starTab">📊 نظر سنجی</button>
+      </div>
+
+      <div id="userTab" class="tab-content">
+        <button id="addUserBtn">➕ افزودن کاربر</button>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>شناسه</th>
+              <th>نام و نام خانوادگی</th>
+              <th>ایمیل</th>
+              <th>موبایل</th>
+              <th>تاریخ</th>
+              <th>وضعیت</th>
+              <th>نقش ها</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="adminUserList"></tbody>
+        </table>
+      </div>
+
+      <div id="roleTab" class="tab-content">
+        <button id="addRoleBtn">➕ افزودن نقش</button>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>شناسه</th>
+              <th>عنوان انگلیسی</th>
+              <th>عنوان فارسی</th>
+              <th>پیش فرض</th>
+              <th>وضعیت</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="adminRoleList"></tbody>
+        </table>
+      </div>
+
+      <div id="groupingUserTab" class="tab-content">
+
+        <!-- دکمه‌های تب -->
+        <div class="inner-tabs">
+          <button class="inner-tab-btn active" data-inner-tab="groupListTab">📌 گروه بندی کاربران</button>
+          <button class="inner-tab-btn" data-inner-tab="sendMessageTab">👥 کاربران</button>
+        </div>
+
+        <!-- محتوا -->
+        <div class="inner-tab-content active" id="groupListTab">
+          <div class="tab-header">
+            <button id="addGroupBtn">➕ افزودن گروه کاربران</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>شناسه</th>
+                <th>نام گروه</th>
+                <th>تعداد اعضا</th>
+                <th>عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="groupList"></tbody>
+          </table>
+        </div>
+
+        <div class="inner-tab-content" id="sendMessageTab">
+          <h3>📨 ارسال پیام گروهی</h3>
+          <select id="groupSelect" class="form-control"></select>
+          <textarea id="messageText" placeholder="متن پیام..." class="form-control"></textarea>
+          <button id="sendMessageBtn" class="primary-btn">📤 ارسال</button>
+        </div>
+
+      </div>
+
+
+      <!-- 
+      <div id="groupingUserTab" class="tab-content">
+        <button id="addGroupBtn">➕ افزودن گروه کاربران</button>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>شناسه</th>
+              <th>نام گروه</th>
+              <th>تعداد اعضا</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="groupList"></tbody>
+        </table>
+      </div> -->
+
+      <div id="newsTab" class="tab-content">
+        <button id="addNewsBtn">➕ افزودن خبر</button>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>شناسه</th>
+              <th>عنوان</th>
+              <th>تاریخ</th>
+              <th>وضعیت</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="adminNewsList"></tbody>
+        </table>
+        <div id="adminPagination" class="pagination"></div>
+      </div>
+
+      <div id="linksTab" class="tab-content">
+        <button id="addLinkBtn">➕ افزودن لینک</button>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>شناسه</th>
+              <th>آدرس</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="adminLinksList"></tbody>
+        </table>
+      </div>
+
+      <div id="starTab" class="tab-content">
+        <button id="addStarBtn">➕ افزودن نظر سنجی</button>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>شناسه</th>
+              <th>عنوان نظر سنجی</th>
+              <th>وضعیت</th>
+              <th>نمایش آمار برای کاربران</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="adminPollList"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- مودال افزودن گروه -->
+  <div id="groupModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span id="closeGroupModal" style="float:left;cursor:pointer;">&times;</span>
+      <h2>ایجاد گروه کاربری</h2>
+      <div style="display:flex; gap:20px;">
+        <!-- ستون لیست همه کارمندان -->
+        <div style="flex:1;">
+          <h3>لیست کاربران</h3>
+          <input type="text" id="employeeSearch" placeholder="جستجو..." style="width:100%; margin-bottom:5px;">
+          <ul id="groupEmployees" class="user-list"></ul>
+        </div>
+
+        <!-- ستون گروه انتخابی -->
+        <div style="flex:1;">
+          <h3>گروه انتخابی</h3>
+          <input type="text" id="groupName" placeholder="نام گروه" style="width: 100%; margin:5px 0;">
+          <ul id="groupUsers" class="user-list"></ul>
+          <button id="saveGroupBtn">💾 ذخیره گروه</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="messageModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>ارسال پیام گروهی</h3>
+      <input type="text" id="msgTitle" class="form-control" placeholder="عنوان پیام" />
+      <textarea id="msgBody" class="form-control" placeholder="متن پیام"></textarea>
+      <button id="sendMsgBtn">ارسال</button>
+      <button id="closeMsgBtn">بستن</button> <!-- دیگه onclick نداره -->
+    </div>
+  </div>
+
+  <div id="pollStatsModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="pollStatsModal">&times;</span>
+      <h2>آمار نظرسنجی</h2>
+      <div id="pollStatsContent"></div>
+    </div>
+  </div>
+
+  <div id="addEditPollModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="addEditPollModal">&times;</span>
+      <h3 id="pollModalTitle">افزودن نظر سنجی</h3>
+      <form id="pollForm">
+        <input type="hidden" id="pollId" />
+        <label>سوال نظرسنجی:</label>
+        <input type="text" id="pollQuestionInput" required />
+        <label>گزینه‌ها:</label>
+        <textarea id="pollOptionsInput" placeholder="هر گزینه یک خط باشد" required></textarea>
+
+        <label>فعال سازی از تاریخ:</label>
+        <input type="date" id="pollStartDateInput" name="startDate">
+
+        <label>تا تاریخ:</label>
+        <input type="date" id="pollEndDateInput" name="endDate">
+        <div class="checkbox-inline" style="border-bottom: 2px solid silver;">
+          <label for="pollIsActiveInput">فعال</label>
+          <input type="checkbox" id="pollIsActiveInput" name="isActive" style="height: 18px;">
+        </div>
+        <div class="checkbox-inline" style="margin-bottom: 30px;border-bottom: 2px solid silver;">
+          <label for="pollShowResultsAfterVoteInput">نمایش آمار بعد رای</label>
+          <input type="checkbox" id="pollShowResultsAfterVoteInput" name="showResultsAfterVote" style="height: 18px;" />
+        </div>
+        <div id="pollFormLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال ارسال...
+        </div>
+        <button type="submit">ثبت</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="deletePollModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="deletePollModal">&times;</span>
+      <h3>حذف نظرسنجی</h3>
+      <p>آیا از حذف این نظرسنجی مطمئن هستید؟</p>
+      <div id="deletePollLoading" class="poll-loading" style="display:none;">
+        <div class="spinner"></div> در حال حذف...
+      </div>
+      <button id="confirmDeletePoll">بله</button>
+      <button id="cancelDeletePoll">خیر</button>
+    </div>
+  </div>
+
+  <div id="addNewsModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="addNewsModal">&times;</span>
+      <h2>افزودن خبر</h2>
+      <form id="addNewsForm">
+        <label>عنوان:</label>
+        <input type="text" id="newsTitle" name="title" required />
+        <label>متن کوتاه:</label>
+        <textarea id="newsShortText" name="shortText"></textarea>
+        <label>توضیحات:</label>
+        <textarea id="newsDescription" name="text"></textarea>
+        <label>فعال:</label>
+        <input type="checkbox" id="newsIsActive" name="isActive" />
+        <label>تصویر:</label>
+        <input type="file" id="newsImage" name="image" accept="image/*" />
+        <img id="newsImagePreview" style="display:none;max-width:150px;margin-top:10px;" />
+        <button type="submit">ذخیره</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editNewsModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="editNewsModal">&times;</span>
+      <h2>ویرایش خبر</h2>
+      <form id="editNewsForm">
+        <input type="hidden" id="editNewsId" name="id" />
+        <label>عنوان:</label>
+        <input type="text" id="editNewsTitle" name="title" required />
+        <label>متن کوتاه:</label>
+        <textarea id="editNewsShortText" name="shortText"></textarea>
+        <label>توضیحات:</label>
+        <textarea id="editNewsDescription" name="text"></textarea>
+        <label>فعال:</label>
+        <input type="checkbox" id="editNewsIsActive" name="isActive" />
+        <label>تصویر جدید (اختیاری):</label>
+        <input type="file" id="editNewsImage" name="image" accept="image/*" />
+        <img id="editNewsImagePreview" style="display:none;max-width:150px;margin-top:10px;" />
+        <button type="submit">بروزرسانی</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="galleryModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeGalleryModal">&times;</span>
+      <h3>گالری خبر</h3>
+
+      <div id="galleryUploadSection">
+        <div id="previewContainer" class="preview-grid"></div>
+
+        <button id="addImageBtn" class="btn-add">+ افزودن تصویر</button>
+        <button id="uploadAllBtn" class="btn-upload">آپلود همه</button>
+
+        <input type="file" id="hiddenFileInput" multiple style="display:none" accept="image/*" />
+      </div>
+
+      <hr>
+
+      <!-- لیست گالری موجود -->
+      <div id="newsGalleryContainer" class="gallery-grid"></div>
+    </div>
+  </div>
+
+  <div id="deleteNewsModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="deleteNewsModal">&times;</span>
+      <h3>حذف خبر</h3>
+      <p>آیا از حذف خبر مطمئن هستید؟</p>
+      <div id="deleteNewsLoading" class="poll-loading" style="display:none;">
+        <div class="spinner"></div> در حال حذف...
+      </div>
+      <button id="confirmDeleteNews">بله</button>
+      <button id="cancelDeleteNews">خیر</button>
+    </div>
+  </div>
+
+  <div id="newsModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+
+      <h2 id="modalTitle"></h2>
+
+      <div class="news-meta">
+        <span id="modalDate"></span>
+        <span id="modalType" class="news-tag"></span>
+      </div>
+
+      <!-- ردیف تصویر و متن کنار هم -->
+      <div class="news-modal-body">
+        <div class="news-desc-modal">
+          <p id="modalDesc"></p>
+        </div>
+        <div class="news-image-modal">
+          <img id="modalImage" src="" alt="" />
+        </div>
+      </div>
+
+      <!-- محل ساخت گالری -->
+      <div id="modalGallery" class="news-gallery"></div>
+
+    </div>
+  </div>
+
+  <div id="lightbox" class="lightboxNews" style="display:none;">
+    <span class="lightbox-close">&times;</span>
+    <span class="lightbox-prev">&#10095;</span>
+    <img class="lightbox-image" src="">
+    <span class="lightbox-next">&#10094;</span>
+  </div>
+
+  <div id="imageLightbox" class="lightbox">
+    <span class="lightbox-close">&times;</span>
+    <img class="lightbox-content" id="lightboxImg" src="" alt="">
+  </div>
+
+  <div id="addLinkModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="addLinkModal">&times;</span>
+      <h3>افزودن لینک</h3>
+      <form id="addLinkForm">
+        <label>آدرس لینک:</label>
+        <input type="text" id="linkTitle" required />
+        <div id="linkFormLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال ارسال...
+        </div>
+        <button type="submit" style="margin-top: 20px;">ثبت</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editLinkModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="editLinkModal">&times;</span>
+      <h3>ویرایش لینک</h3>
+      <form id="editLinkForm">
+        <input type="hidden" id="editLinkId" />
+        <label>آدرس لینک:</label>
+        <input type="text" id="editLinkTitle" required />
+        <div id="editLinkLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال بروزرسانی...
+        </div>
+        <button type="submit" style="margin-top: 20px;">ذخیره تغییرات</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="deleteLinkModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="deleteLinkModal">&times;</span>
+      <h3>حذف لینک</h3>
+      <p>آیا از حذف لینک مطمئن هستید؟</p>
+      <div id="deleteLinkLoading" class="poll-loading" style="display:none;">
+        <div class="spinner"></div> در حال حذف...
+      </div>
+      <button id="confirmDeleteLink">بله</button>
+      <button id="cancelDeleteLink">خیر</button>
+    </div>
+  </div>
+
+  <div id="addUserModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="addUserModal">&times;</span>
+      <h2>افزودن کاربر جدید</h2>
+      <form id="addUserForm">
+        <label>نام و نام خانوادگی:</label>
+        <input type="text" id="addUserFullName" required />
+
+        <label>ایمیل:</label>
+        <input type="email" id="addUserEmail" required />
+
+        <label>موبایل:</label>
+        <input type="text" id="addUserMobile" />
+
+        <label>کلمه عبور:</label>
+        <input type="password" id="addUserPassword" required />
+
+        <label>نقش‌ها:</label>
+        <select id="addUserRole" multiple required></select>
+        <small>برای انتخاب چند نقش، کلید Ctrl یا ⌘ را نگه دارید</small>
+
+        <div style="margin-top:10px;">
+          <label>
+            <input type="checkbox" id="addUserIsActive" checked />
+            فعال
+          </label>
+        </div>
+
+        <div id="addUserLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال افزودن...
+        </div>
+
+        <button type="submit" style="margin-top: 15px;">ذخیره</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editUserModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="editUserModal">&times;</span>
+      <h2>ویرایش کاربر</h2>
+      <form id="editUserForm">
+        <input type="hidden" id="editUserId" />
+
+        <label>نام و نام خانوادگی:</label>
+        <input type="text" id="editUserFullName" required />
+
+        <label>ایمیل:</label>
+        <input type="email" id="editUserEmail" required />
+
+        <label>موبایل:</label>
+        <input type="text" id="editUserMobile" />
+
+        <label>کلمه عبور جدید (اختیاری):</label>
+        <input type="password" id="editUserPassword" placeholder="در صورت عدم تغییر خالی بگذارید" />
+
+        <label>نقش‌ها:</label>
+        <select id="editUserRole" multiple required></select>
+        <small>برای انتخاب چند نقش، کلید Ctrl یا ⌘ را نگه دارید</small>
+
+        <div style="margin-top:10px;">
+          <label>
+            <input type="checkbox" id="editUserIsActive" />
+            فعال
+          </label>
+        </div>
+
+        <div id="editUserLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال بروزرسانی...
+        </div>
+
+        <button type="submit" style="margin-top: 15px;">ذخیره تغییرات</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="deleteUserModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="deleteUserModal">&times;</span>
+      <h3>حذف کاربر</h3>
+      <p>آیا از حذف این کاربر مطمئن هستید؟</p>
+      <div id="deleteUserLoading" class="poll-loading" style="display:none;">
+        <div class="spinner"></div> در حال حذف...
+      </div>
+      <button id="confirmDeleteUser">بله</button>
+      <button id="cancelDeleteUser">خیر</button>
+    </div>
+  </div>
+
+  <div id="addRoleModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="addRoleModal">&times;</span>
+      <h2>افزودن نقش جدید</h2>
+      <form id="addRoleForm">
+        <label>عنوان:</label>
+        <input type="text" id="addRoleTitle" required />
+
+        <label>عنوان فارسی:</label>
+        <input type="text" id="addRoleRoleTitle" required />
+
+        <label>نقش پیش‌فرض:</label>
+        <input type="checkbox" id="addRoleIsDefault" style="margin-top: -80px;" />
+
+        <hr />
+        <label style="margin-top: 10px;">دسترسی‌ها:</label>
+        <div id="addRolePermissions" class="permissions-list"
+          style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+        </div>
+
+        <div id="addRoleLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال افزودن...
+        </div>
+
+        <button type="submit" style="margin-top: 15px;">ذخیره</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editRoleModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="editRoleModal">&times;</span>
+      <h2>ویرایش نقش</h2>
+      <form id="editRoleForm">
+        <input type="hidden" id="editRoleId" />
+
+        <label>عنوان:</label>
+        <input type="text" id="editRoleTitle" required />
+
+        <label>عنوان فارسی:</label>
+        <input type="text" id="editRoleRoleTitle" required />
+
+        <label>نقش پیش‌فرض:</label>
+        <input type="checkbox" id="editRoleIsDefault" style="margin-top: -80px;" />
+
+        <hr />
+        <label style="margin-top: 10px;">دسترسی‌ها:</label>
+        <div id="editRolePermissions" class="permissions-list"
+          style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+        </div>
+
+        <div id="editRoleLoading" class="poll-loading" style="display:none;">
+          <div class="spinner"></div> در حال بروزرسانی...
+        </div>
+
+        <button type="submit" style="margin-top: 15px;">ذخیره تغییرات</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="deleteRoleModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" data-modal-id="deleteRoleModal">&times;</span>
+      <h3>حذف نقش</h3>
+      <p>آیا از حذف این نقش مطمئن هستید؟</p>
+      <div id="deleteRoleLoading" class="poll-loading" style="display:none;">
+        <div class="spinner"></div> در حال حذف...
+      </div>
+      <button id="confirmDeleteRole">بله</button>
+      <button id="cancelDeleteRole">خیر</button>
+    </div>
+  </div>
+
+
+  <div class="background-layer" id="backgroundLayer"></div>
+  <div class="background-overlay" id="backgroundOverlay"></div>
+
+  <input type="file" id="bgUploader" accept="image/*" style="display:none;" />
+
+
+  <div id="themeToggleButton" class="theme-btn">🎨</div>
+
+  <div id="notificationContainer" class="notifications"></div>
+
+  <div id="themePanel" class="theme-panel">
+    <h5>انتخاب تم</h5>
+    <button class="theme-option" data-theme="b1">
+      <img src="./background/b1.jpg" alt="kharazmi" width="20" />
+    </button>
+    <button class="theme-option" data-theme="b2">
+      <img src="./background/b2.jpg" alt="kharazmi" width="20" />
+    </button>
+    <button class="theme-option" data-theme="b3">
+      <img src="./background/b3.jpg" alt="kharazmi" width="20" />
+    </button>
+    <button class="theme-option" data-theme="b4">
+      <img src="./background/b4.jpg" alt="kharazmi" width="20" />
+    </button>
+    <button class="theme-option" data-theme="b6">
+      <img src="./background/b6.jpg" alt="kharazmi" width="20" />
+    </button>
+    <button class="theme-option" data-theme="b7">
+      <img src="./background/b7.jpg" alt="kharazmi" width="20" />
+    </button>
+    <button class="theme-option" data-theme="b8">
+      <img src="./background/b8.jpg" alt="kharazmi" width="20" />
+    </button>
+  </div>
+
+  <div class="designer-badge">طراحی شده با <span title="عشق">❤️</span> <span class="designer-name">توسط گروه زیر
+      ساخت</span></div>
+
+
+  <script src="./script.js"></script>
+  <script src="./admin-panel.js"></script>
+  <script src="./poll.js"></script>
+
+</body>
+
+</html>

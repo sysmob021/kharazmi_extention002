@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Kharazmi",
+  "version": "1.0",
+  "description": "اکستنش کاربری خوارزمی",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "storage",
+    "notifications"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "kharazmi_logo.png",
+      "48": "kharazmi_logo.png",
+      "128": "kharazmi_logo.png"
+    }
+  },
+  "icons": {
+    "16": "kharazmi_logo.png",
+    "48": "kharazmi_logo.png",
+    "128": "kharazmi_logo.png"
+  }
+}
