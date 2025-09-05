@@ -1432,10 +1432,79 @@ width: 120px;
 }
 
 
+.search-table-input{
+height: 10px;
+    font-size: 12px !important;
+    background-color: #2c3851;
+    width: 90% !important;
+        color: #fff;
+}
 
 
 
-/* کانتینر تب‌ها */
+.table-scroll-container {
+  max-height: 350px; /* ارتفاع دلخواه */
+  overflow-y: auto;
+  direction: rtl; /* اسکرول سمت چپ اگر بخوای */
+}
+
+/* رنگ و ظاهر اسکرول همون تیره قبلی */
+.table-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: #333 #1a1a1a;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 10px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 10px;
+  transition: 'background 0.3s ease';
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+
+
+.admin-modal .modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #6d6d6d #414141; 
+}
+
+.admin-modal .modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-modal .modal-content::-webkit-scrollbar-track {
+  background: #1a1a1a; 
+  border-radius: 10px;
+}
+
+.admin-modal .modal-content::-webkit-scrollbar-thumb {
+  background: #6e6e6e;
+  border-radius: 10px;
+  transition: 'background 0.3s ease';
+}
+
+.admin-modal .modal-content::-webkit-scrollbar-thumb:hover {
+  background: #868686; 
+}
+
+
+
+
+
 .inner-tabs {
   display: flex;
   margin-bottom: 15px;
@@ -1466,7 +1535,6 @@ width: 120px;
   border-bottom: 3px solid #0056b3;
 }
 
-/* محتوا */
 .inner-tab-content {
   display: none;
 }

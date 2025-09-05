@@ -186,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("addNewsForm").addEventListener("submit", handleAddNews);
   document.getElementById("editNewsForm").addEventListener("submit", handleEditNews);
   document.getElementById("addLinkForm").addEventListener("submit", handleAddLink);
-  document.getElementById("editLinkForm").addEventListener("submit", handleEditLink);
+  // document.getElementById("editLinkForm").addEventListener("submit", handleEditLink);
 
   document.getElementById("cancelDeleteNews").addEventListener("click", () => closeModal("deleteNewsModal"));
   document.getElementById("cancelDeleteLink").addEventListener("click", () => closeModal("deleteLinkModal"));
@@ -442,32 +442,51 @@ function openAdminPanel() {
   openModal("adminPanelModal");
   controlAdminUI();
 
-  const addNewsBtn = document.getElementById("addNewsBtn");
-  if (addNewsBtn) {
-    addNewsBtn.onclick = () => {
-      document.getElementById("newsTitle").value = "";
-      document.getElementById("newsShortText").value = "";
-      document.getElementById("newsDescription").value = "";
-      document.getElementById("newsIsActive").value = "";
-      openModal("addNewsModal");
-    };
-  }
+  // const addNewsBtn = document.getElementById("addNewsBtn");
+  // if (addNewsBtn) {
+  //   addNewsBtn.onclick = () => {
+  //     document.getElementById("newsTitle").value = "";
+  //     document.getElementById("newsShortText").value = "";
+  //     document.getElementById("newsDescription").value = "";
+  //     document.getElementById("newsIsActive").value = "";
+  //     openModal("addNewsModal");
+  //   };
+  // }
 
-  const addLinkBtn = document.getElementById("addLinkBtn");
-  if (addLinkBtn) {
-    addLinkBtn.onclick = () => {
-      document.getElementById("linkTitle").value = "";
-      openModal("addLinkModal");
-    };
-  }
+  // const addLinkBtn = document.getElementById("addLinkBtn");
+  // if (addLinkBtn) {
+  //   addLinkBtn.onclick = () => {
+  //     document.getElementById("linkTitle").value = "";
+  //     openModal("addLinkModal");
+  //   };
+  // }
 
-  const adminPollList = document.getElementById("adminPollList");
-  if (adminPollList) {
-    adminPollList.onclick = () => {
-      openModal("pollStatsModal");
-    };
-  }
+  // const adminPollList = document.getElementById("adminPollList");
+  // if (adminPollList) {
+  //   adminPollList.onclick = () => {
+  //     openModal("pollStatsModal");
+  //   };
+  // }
 }
+document.getElementById("addNewsBtn").addEventListener("click", () => {
+  document.getElementById("newsTitle").value = "";
+  document.getElementById("newsShortText").value = "";
+  document.getElementById("newsDescription").value = "";
+  document.getElementById("newsIsActive").value = "";
+  openModal("addNewsModal");
+});
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("delete-news-btn")) {
+    const id = e.target.dataset.id;
+    openDeleteNewsModal(id);
+  }
+});
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("delete-link-btn")) {
+    const id = e.target.dataset.id;
+    openDeleteLinkModal(id);
+  }
+});
 
 let adminCurrentPage = 1;
 const adminPageSize = 5;
@@ -587,7 +606,7 @@ function renderNewsList(data) {
       btn.style.display = "none";
     });
   }
-  if (!hasPermission("DeleteNew")) {
+  if (!hasPermission("DeleteNews")) {
     const buttons = document.querySelectorAll(".delete-news-btn");
     buttons.forEach((btn) => {
       btn.style.display = "none";
@@ -792,7 +811,14 @@ function renderLinksList(data) {
     });
   }
 }
-
+const addLinkBtn = document.getElementById("addLinkBtn");
+if (addLinkBtn) {
+  addLinkBtn.onclick = () => {
+    debugger;
+    document.getElementById("linkTitle").value = "";
+    openModal("addLinkModal");
+  };
+}
 async function handleAddLink(e) {
   e.preventDefault();
 
@@ -801,7 +827,7 @@ async function handleAddLink(e) {
   loadingEl.style.display = "flex";
 
   try {
-    const res = await fetchWithAuth(`${BASE_URL}/NewsAdmin/Save`, {
+    const res = await fetchWithAuth(`${BASE_URL}/LinkAdmin/Save`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ linkTitle }),
@@ -870,7 +896,7 @@ async function deleteLink(id) {
   if (loadingEl) loadingEl.style.display = "flex";
 
   try {
-    const res = await fetchWithAuth(`${BASE_URL}/NewsAdmin/Delete/${id}`, {
+    const res = await fetchWithAuth(`${BASE_URL}/LinkAdmin/Delete/${id}`, {
       method: "DELETE",
     });
 
@@ -906,7 +932,112 @@ function hasPermission(permission) {
   const perms = JSON.parse(stored);
   return perms.includes(permission);
 }
+
 function controlAdminUI() {
+  const tabsConfig = [
+    { id: "userTab", perm: "GetAllUsers" },
+    { id: "roleTab", perm: "GetAllRoles" },
+    { id: "groupingUserTab", perm: "GetAllRoles" },
+    { id: "newsTab", perm: "GetAllNewsAdmin" },
+    { id: "linksTab", perm: "GetAllAdminLink" },
+    { id: "starTab", perm: "GetAllPolls" },
+  ];
+
+  const innerTabsConfig = {
+    groupingUserTab: [
+      { id: "groupListTab", perm: "GetAllGroups" },
+      { id: "employeeTab", perm: "GetAllEmployees" },
+    ],
+  };
+
+  // ریست تب‌های اصلی
+  document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach((tab) => {
+    tab.classList.remove("active");
+    tab.style.display = "none";
+  });
+
+  const allowedTabs = [];
+  tabsConfig.forEach(({ id, perm }) => {
+    const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
+    const content = document.getElementById(id);
+
+    if (!hasPermission(perm)) {
+      btn?.style.setProperty("display", "none");
+      content?.style.setProperty("display", "none");
+    } else {
+      allowedTabs.push({ btn, content });
+      btn?.style.removeProperty("display");
+      content?.style.removeProperty("display");
+    }
+  });
+
+  if (allowedTabs.length > 0) {
+    const firstAllowed = allowedTabs[0];
+    firstAllowed.btn.classList.add("active");
+    firstAllowed.content.classList.add("active");
+    firstAllowed.content.style.display = "block";
+
+    allowedTabs[0].btn.click();
+  }
+
+  Object.entries(innerTabsConfig).forEach(([parentTabId, innerConfigs]) => {
+    const parentTabContent = document.getElementById(parentTabId);
+    if (!parentTabContent) return;
+
+    const allInnerBtns = parentTabContent.querySelectorAll(".inner-tab-btn");
+    const allInnerContents = parentTabContent.querySelectorAll(".inner-tab-content");
+
+    allInnerBtns.forEach((btn) => btn.classList.remove("active"));
+    allInnerContents.forEach((tab) => {
+      tab.classList.remove("active");
+      tab.style.display = "none";
+    });
+
+    const allowedInnerTabs = [];
+    innerConfigs.forEach(({ id, perm }) => {
+      const btn = parentTabContent.querySelector(`.inner-tab-btn[data-inner-tab="${id}"]`);
+      const content = parentTabContent.querySelector(`#${id}`);
+
+      if (!hasPermission(perm)) {
+        btn?.style.setProperty("display", "none");
+        content?.style.setProperty("display", "none");
+      } else {
+        allowedInnerTabs.push({ btn, content });
+        btn?.style.removeProperty("display");
+        content?.style.removeProperty("display");
+      }
+    });
+
+    if (allowedInnerTabs.length > 0) {
+      allowedInnerTabs[0].btn.classList.add("active");
+      allowedInnerTabs[0].content.classList.add("active");
+      allowedInnerTabs[0].content.style.display = "block";
+
+      allowedInnerTabs[0].btn.click();
+    }
+
+    allInnerBtns.forEach((innerBtn) => {
+      innerBtn.addEventListener("click", () => {
+        allInnerBtns.forEach((btn) => btn.classList.remove("active"));
+        allInnerContents.forEach((tab) => {
+          tab.classList.remove("active");
+          tab.style.display = "none";
+        });
+
+        innerBtn.classList.add("active");
+        const targetId = innerBtn.getAttribute("data-inner-tab");
+        const targetContent = parentTabContent.querySelector(`#${targetId}`);
+        if (targetContent) {
+          targetContent.classList.add("active");
+          targetContent.style.display = "block";
+        }
+      });
+    });
+  });
+}
+
+function controlAdminU11I() {
   const tabsConfig = [
     { id: "userTab", perm: "GetAllUsers" },
     { id: "roleTab", perm: "GetAllRoles" },
@@ -1097,6 +1228,8 @@ function formatDateForInput(dateString) {
   return date.toISOString().split("T")[0]; // فقط YYYY-MM-DD
 }
 async function openEditPoll(id) {
+  debugger;
+
   try {
     const res = await fetchWithAuth(`${BASE_URL}/PollAdmin/GetPollById/${id}`);
 
@@ -1264,6 +1397,7 @@ document.getElementById("cancelDeletePoll").addEventListener("click", () => {
 });
 
 async function openStatsPoll(id) {
+  debugger;
   try {
     const res = await fetchWithAuth(`${BASE_URL}/PollAdmin/${id}/results`);
 
@@ -1790,7 +1924,6 @@ let selectedEmployees = new Set();
 let allEmployeesData = [];
 let currentGroupId = null;
 
-// 📌 باز کردن مودال و ریست
 document.getElementById("addGroupBtn").addEventListener("click", () => {
   openGroupModal();
 });
@@ -1816,16 +1949,41 @@ function openGroupModal(id = null) {
   groupModal.style.display = "block";
 }
 
-// 📌 لود لیست گروه‌ها
 async function loadAllGroups() {
+  const tbody = document.getElementById("groupList");
+  tbody.innerHTML = `<tr><td colspan="4">⏳ در حال دریافت لیست گروه‌ها...</td></tr>`;
+
   try {
-    const res = await fetch(`${BASE_URL}/GroupingUsers`);
-    if (!res.ok) throw new Error("خطا در دریافت گروه‌ها");
+    const res = await fetchWithAuth(`${BASE_URL}/GroupingUsers`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res) {
+      tbody.innerHTML = `<tr><td colspan="4">⚠️ ورود شما معتبر نیست، لطفاً دوباره وارد شوید.</td></tr>`;
+      return;
+    }
+
+    if (!res.ok) {
+      let errorMsg = `❌ خطا در دریافت گروه‌ها (کد ${res.status})`;
+      try {
+        const errData = await res.json();
+        if (errData?.message) {
+          errorMsg = `❌ ${errData.message}`;
+        }
+      } catch {}
+      tbody.innerHTML = `<tr><td colspan="4" style="color:red">${errorMsg}</td></tr>`;
+      return;
+    }
 
     const groups = await res.json();
-    const tbody = document.getElementById("groupList");
-    tbody.innerHTML = "";
 
+    if (!groups || groups.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4">هیچ گروهی یافت نشد.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = "";
     groups.forEach((g) => {
       const tr = document.createElement("tr");
 
@@ -1833,10 +1991,10 @@ async function loadAllGroups() {
       tdId.textContent = g.id;
 
       const tdName = document.createElement("td");
-      tdName.textContent = g.groupName;
+      tdName.textContent = g.groupName || "—";
 
       const tdCount = document.createElement("td");
-      tdCount.textContent = g.employeeCount;
+      tdCount.textContent = g.employeeCount ?? 0;
 
       const tdActions = document.createElement("td");
 
@@ -1860,26 +2018,23 @@ async function loadAllGroups() {
       tbody.appendChild(tr);
     });
   } catch (error) {
-    console.error(error);
-    alert("دریافت گروه‌ها با خطا مواجه شد.");
+    console.error("خطا در loadAllGroups:", error);
+    tbody.innerHTML = `<tr><td colspan="4" style="color:red">❌ مشکل در اتصال به سرور.</td></tr>`;
   }
 }
 
-// 📌 باز کردن مودال ارسال پیام
 function openMessageModal(groupId) {
   const modal = document.getElementById("messageModal");
   modal.style.display = "block";
   document.getElementById("sendMsgBtn").dataset.groupId = groupId;
 }
 
-// 📌 بستن مودال
 function closeMessageModal() {
   document.getElementById("messageModal").style.display = "none";
   document.getElementById("msgTitle").value = "";
   document.getElementById("msgBody").value = "";
 }
 
-// 📌 لود کارمندان
 async function loadAllEmployees(excludeIds = []) {
   const res = await fetch(`${BASE_URL}/employee`);
   allEmployeesData = await res.json();
@@ -1888,7 +2043,6 @@ async function loadAllEmployees(excludeIds = []) {
 
   renderEmployees(filteredEmployees);
 
-  // سرچ زنده
   const searchInput = document.getElementById("employeeSearch");
   searchInput.oninput = () => {
     const term = searchInput.value.trim().toLowerCase();
@@ -1897,7 +2051,6 @@ async function loadAllEmployees(excludeIds = []) {
   };
 }
 
-// 📌 لیست کارمندان سمت چپ
 function renderEmployees(employees) {
   const container = document.getElementById("groupEmployees");
   container.innerHTML = "";
@@ -1917,7 +2070,6 @@ function renderEmployees(employees) {
   initDragAndDrop();
 }
 
-// 📌 تغییر انتخاب
 function toggleSelection(li) {
   const id = li.dataset.id;
   if (selectedEmployees.has(id)) {
@@ -1966,68 +2118,118 @@ function initDragAndDrop() {
   });
 }
 
-// 📌 ذخیره گروه
 document.getElementById("saveGroupBtn").addEventListener("click", async () => {
+  const saveBtn = document.getElementById("saveGroupBtn");
   const groupName = document.getElementById("groupName").value.trim();
   const employeeIds = Array.from(document.querySelectorAll("#groupUsers li")).map((li) => parseInt(li.dataset.id));
 
   if (!groupName) {
-    alert("لطفاً نام گروه را وارد کنید");
+    alert("❗ لطفاً نام گروه را وارد کنید.");
     return;
   }
 
   const payload = { groupName, employeeIds };
-  if (currentGroupId) {
-    await fetch(`${BASE_URL}/GroupingUsers/${currentGroupId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    alert("گروه ویرایش شد");
-  } else {
-    await fetch(`${BASE_URL}/GroupingUsers`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    alert("گروه اضافه شد");
-  }
+  const isEdit = Boolean(currentGroupId);
 
-  groupModal.style.display = "none";
-  loadAllGroups();
+  saveBtn.disabled = true;
+  saveBtn.textContent = "⏳ در حال ذخیره...";
+
+  try {
+    const url = isEdit ? `${BASE_URL}/GroupingUsers/${currentGroupId}` : `${BASE_URL}/GroupingUsers`;
+
+    const method = isEdit ? "PUT" : "POST";
+
+    const res = await fetchWithAuth(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res) {
+      alert("⚠️ ورود شما معتبر نیست. لطفاً دوباره وارد شوید.");
+      return;
+    }
+
+    if (!res.ok) {
+      let errorMsg = `❌ خطا در ذخیره گروه (کد ${res.status})`;
+      try {
+        const errData = await res.json();
+        if (errData?.message) {
+          errorMsg = `❌ ${errData.message}`;
+        }
+      } catch {}
+      alert(errorMsg);
+      return;
+    }
+
+    alert(isEdit ? "✅ گروه با موفقیت ویرایش شد." : "✅ گروه با موفقیت اضافه شد.");
+
+    groupModal.style.display = "none";
+    loadAllGroups();
+  } catch (err) {
+    console.error("خطا در ذخیره گروه:", err);
+    alert("❌ مشکل در اتصال به سرور یا ذخیره گروه.");
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = isEdit ? "ویرایش گروه" : "افزودن گروه";
+  }
 });
 
-// 📌 پر کردن مودال ویرایش
-async function loadGroupData(id) {
-  // اول همه کارمندان رو بگیر
-  await loadAllEmployees();
+async function loadGroupData(groupId) {
+  try {
+    await loadAllEmployees();
 
-  const res = await fetch(`${BASE_URL}/GroupingUsers/${id}`);
-  const data = await res.json();
+    const rightContainer = document.getElementById("groupUsers");
+    const groupNameInput = document.getElementById("groupName");
 
-  document.getElementById("groupName").value = data.groupName;
+    rightContainer.innerHTML = "<li>⏳ در حال بارگذاری اعضای گروه...</li>";
 
-  const rightContainer = document.getElementById("groupUsers");
-  rightContainer.innerHTML = "";
-  data.employeeIds.forEach((empId) => {
-    const emp = allEmployeesData.find((e) => e.id === empId);
-    if (emp) {
-      const li = document.createElement("li");
-      li.textContent = `${emp.name} (${emp.email || ""})`;
-      li.draggable = true;
-      li.dataset.id = emp.id;
-      li.addEventListener("click", (e) => {
-        e.preventDefault();
-        toggleSelection(li);
-      });
-      rightContainer.appendChild(li);
+    const res = await fetchWithAuth(`${BASE_URL}/GroupingUsers/${groupId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res) {
+      alert("⚠️ ورود شما معتبر نیست، لطفاً دوباره وارد شوید.");
+      rightContainer.innerHTML = "";
+      return;
     }
-  });
 
-  // به‌روز کردن سمت چپ بدون اعضای گروه
-  const memberIds = data.employeeIds;
-  const leftList = allEmployeesData.filter((emp) => !memberIds.includes(emp.id));
-  renderEmployees(leftList);
+    if (!res.ok) {
+      alert(`❌ خطا در دریافت داده‌های گروه (کد ${res.status})`);
+      rightContainer.innerHTML = "";
+      return;
+    }
+
+    const data = await res.json();
+    const memberIds = Array.isArray(data.employeeIds) ? data.employeeIds : [];
+
+    groupNameInput.value = data.groupName || "";
+
+    rightContainer.innerHTML = "";
+    memberIds.forEach((empId) => {
+      const emp = allEmployeesData.find((e) => e.id === empId);
+      if (emp) {
+        const li = document.createElement("li");
+        li.textContent = `${emp.name} (${emp.email || ""})`;
+        li.draggable = true;
+        li.dataset.id = emp.id;
+
+        li.addEventListener("click", (e) => {
+          e.preventDefault();
+          toggleSelection(li);
+        });
+
+        rightContainer.appendChild(li);
+      }
+    });
+
+    const leftList = allEmployeesData.filter((emp) => !memberIds.includes(emp.id));
+    renderEmployees(leftList);
+  } catch (err) {
+    console.error("خطا در loadGroupData:", err);
+    alert("❌ مشکل در اتصال به سرور یا دریافت داده‌های گروه.");
+  }
 }
 
 function editGroup(id) {
@@ -2042,6 +2244,7 @@ async function deleteGroup(id) {
 
 //================= Message For Users ===========
 // let currentGroupId = null;
+let currentMessageTarget = { type: null, id: null };
 
 // 📌 باز کردن مودال ارسال پیام
 function openMessageModal(groupId) {
@@ -2059,30 +2262,61 @@ function closeMessageModal() {
 
 // 📌 ارسال پیام به گروه
 async function sendGroupMessage() {
-  const groupId = document.getElementById("sendMsgBtn").dataset.groupId;
+  const sendBtn = document.getElementById("sendMsgBtn");
+  const groupId = sendBtn?.dataset.groupId;
   const title = document.getElementById("msgTitle").value.trim();
   const message = document.getElementById("msgBody").value.trim();
+
+  if (!groupId) {
+    alert("شناسه گروه یافت نشد.");
+    return;
+  }
 
   if (!title || !message) {
     alert("عنوان و متن پیام را وارد کنید.");
     return;
   }
 
+  sendBtn.disabled = true;
+  sendBtn.textContent = "⏳ ارسال...";
   try {
-    const res = await fetch(`${BASE_URL}/Notification/SendGroupNotification/${groupId}`, {
+    const res = await fetchWithAuth(`${BASE_URL}/Notification/SendGroupNotification/${groupId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, message }),
     });
 
-    if (!res.ok) throw new Error("ارسال پیام با خطا مواجه شد.");
+    if (!res) {
+      alert("⚠️ ورود شما معتبر نیست، لطفاً دوباره وارد شوید.");
+      return;
+    }
+
+    if (!res.ok) {
+      let errorText = `❌ ارسال پیام با خطا مواجه شد (کد ${res.status})`;
+      try {
+        const errData = await res.json();
+        if (errData?.message) errorText = `❌ ${errData.message}`;
+      } catch {}
+      alert(errorText);
+      return;
+    }
 
     const data = await res.json();
-    alert(data.message || "پیام ارسال شد.");
+    alert(data.message || "✅ پیام با موفقیت ارسال شد.");
+
+    // پاک‌سازی فرم
+    document.getElementById("msgTitle").value = "";
+    document.getElementById("msgBody").value = "";
+
+    // بستن مودال
     closeMessageModal();
   } catch (error) {
-    console.error(error);
-    alert("ارسال پیام با خطا مواجه شد.");
+    console.error("خطای ارسال پیام:", error);
+    alert("❌ مشکل در اتصال به سرور یا ارسال پیام.");
+  } finally {
+    // برگرداندن حالت دکمه
+    sendBtn.disabled = false;
+    sendBtn.textContent = "ارسال پیام";
   }
 }
 
@@ -2090,14 +2324,160 @@ async function sendGroupMessage() {
 document.getElementById("closeMsgBtn").addEventListener("click", closeMessageModal);
 document.getElementById("sendMsgBtn").addEventListener("click", sendGroupMessage);
 
+document.querySelector('[data-inner-tab="groupListTab"]').addEventListener("click", loadAllGroups);
+document.querySelector('[data-inner-tab="employeeTab"]').addEventListener("click", loadEmployeesAuth);
+
 document.querySelectorAll(".inner-tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    // حذف active از همه
     document.querySelectorAll(".inner-tab-btn").forEach((b) => b.classList.remove("active"));
     document.querySelectorAll(".inner-tab-content").forEach((c) => c.classList.remove("active"));
 
-    // فعال کردن تب انتخاب‌شده
     btn.classList.add("active");
-    document.getElementById(btn.dataset.innerTab).classList.add("active");
+
+    const targetId = btn.dataset.innerTab;
+    const targetContent = document.getElementById(targetId);
+    if (targetContent) {
+      targetContent.classList.add("active");
+    } else {
+      console.warn(`تب با id="${targetId}" پیدا نشد`);
+    }
   });
+});
+
+// کش اطلاعات کارکنان
+let employeeCache = null;
+async function loadEmployeesAuth() {
+  const tbody = document.getElementById("employeeList");
+
+  if (employeeCache) {
+    renderEmployees(employeeCache, tbody);
+    return;
+  }
+
+  tbody.innerHTML = `<tr><td colspan="8">⏳ در حال دریافت اطلاعات...</td></tr>`;
+
+  try {
+    const res = await fetchWithAuth(`${BASE_URL}/employee`);
+
+    if (!res) {
+      tbody.innerHTML = `<tr><td colspan="8">⚠️ ورود شما معتبر نیست، لطفاً دوباره وارد شوید.</td></tr>`;
+      return;
+    }
+
+    if (!res.ok) {
+      tbody.innerHTML = `<tr><td colspan="8" style="color:red">❌ خطا در دریافت اطلاعات (${res.status})</td></tr>`;
+      return;
+    }
+
+    const employees = await res.json();
+    employeeCache = employees;
+    renderEmployees(employees, tbody);
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="8" style="color:red">❌ مشکل در اتصال به سرور</td></tr>`;
+  }
+}
+
+function renderEmployees(employees, tbody) {
+  if (!employees || employees.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8">⚠️ کارمندی یافت نشد.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = employees
+    .map(
+      (emp) => `
+        <tr>
+          <td>${emp.id}</td>
+          <td>${emp.name || "-"}</td>
+          <td>${emp.email || "-"}</td>
+          <td>${emp.department || "-"}</td>
+          <td>${emp.phone || "-"}</td>
+          <td>${emp.ipAddress || "-"}</td>
+          <td>
+            <button class="send-msg-btn" data-id="${emp.id}" title="ارسال پیام">✉️ ارسال پیام</button>
+          </td>
+        </tr>
+      `
+    )
+    .join("");
+
+  tbody.querySelectorAll(".send-msg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentMessageTarget = { type: "employee", id: btn.dataset.id };
+      document.getElementById("msgTitle").value = "";
+      document.getElementById("msgBody").value = "";
+      openModal("messageModal");
+    });
+  });
+}
+
+document.querySelectorAll(".filter-row input").forEach((input) => {
+  input.addEventListener("input", () => {
+    const filters = {};
+    document.querySelectorAll(".filter-row input").forEach((inp) => {
+      const val = inp.value.trim().toLowerCase();
+      if (val) filters[inp.dataset.col] = val;
+    });
+
+    const tbody = document.getElementById("employeeList");
+    if (!employeeCache) return;
+
+    const filtered = employeeCache.filter((emp) => {
+      return Object.entries(filters).every(([key, val]) => {
+        return emp[key] && emp[key].toString().toLowerCase().includes(val);
+      });
+    });
+
+    renderEmployees(filtered, tbody);
+  });
+});
+
+document.getElementById("sendMsgBtn").addEventListener("click", async () => {
+  const title = document.getElementById("msgTitle").value.trim();
+  const body = document.getElementById("msgBody").value.trim();
+
+  if (!title || !body) {
+    alert("⚠ لطفاً عنوان و متن پیام را پر کنید.");
+    return;
+  }
+
+  try {
+    let url;
+    let payload = { title, message: body };
+
+    if (currentMessageTarget.type === "employee") {
+      url = `${BASE_URL}/api/Notifications/Employee/${currentMessageTarget.id}`;
+    } else if (currentMessageTarget.type === "group") {
+      url = `${BASE_URL}/api/Notifications/Group/${currentMessageTarget.id}`;
+    } else {
+      alert("❌ مقصد پیام مشخص نیست.");
+      return;
+    }
+
+    const res = await fetchWithAuth(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res) {
+      alert("❌ نیاز به ورود مجدد");
+      return;
+    }
+
+    if (res.ok) {
+      alert("✅ پیام با موفقیت ارسال شد.");
+      closeModal("messageModal");
+    } else {
+      alert("❌ خطا در ارسال پیام");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("❌ خطا در ارتباط با سرور");
+  }
+});
+
+document.getElementById("closeMsgBtn").addEventListener("click", () => {
+  closeModal("messageModal");
 });

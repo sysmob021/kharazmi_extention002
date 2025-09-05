@@ -163,7 +163,7 @@
         <!-- دکمه‌های تب -->
         <div class="inner-tabs">
           <button class="inner-tab-btn active" data-inner-tab="groupListTab">📌 گروه بندی کاربران</button>
-          <button class="inner-tab-btn" data-inner-tab="sendMessageTab">👥 کاربران</button>
+          <button class="inner-tab-btn" data-inner-tab="employeeTab">👥 کاربران</button>
         </div>
 
         <!-- محتوا -->
@@ -184,11 +184,45 @@
           </table>
         </div>
 
-        <div class="inner-tab-content" id="sendMessageTab">
-          <h3>📨 ارسال پیام گروهی</h3>
-          <select id="groupSelect" class="form-control"></select>
-          <textarea id="messageText" placeholder="متن پیام..." class="form-control"></textarea>
-          <button id="sendMessageBtn" class="primary-btn">📤 ارسال</button>
+        <div class="inner-tab-content" id="employeeTab">
+          <h3> لیست کارمندان</h3>
+          <div class="table-scroll-container">
+            <table class="admin-table">
+              <thead>
+                <tr class="filter-row">
+                  <th><input type="text" data-col="id" class="form-control search-table-input"
+                      style="width: 57px !important;" placeholder="جستجو..." />
+                  </th>
+                  <th><input type="text" data-col="name" class="form-control search-table-input"
+                      placeholder="جستجو..." />
+                  </th>
+                  <th><input type="text" data-col="email" class="form-control search-table-input"
+                      placeholder="جستجو..." /></th>
+                  <th><input type="text" data-col="department" class="form-control search-table-input"
+                      placeholder="جستجو..." /></th>
+                  <th><input type="text" data-col="phone" class="form-control search-table-input"
+                      placeholder="جستجو..." /></th>
+                  <th><input type="text" data-col="ipAddress" class="form-control search-table-input"
+                      placeholder="جستجو..." /></th>
+                  <th><!-- ستون عملیات فیلتر نداره --></th>
+                </tr>
+                <tr>
+                  <th>شناسه</th>
+                  <th>نام</th>
+                  <th>ایمیل</th>
+                  <th>بخش</th>
+                  <th>تلفن</th>
+                  <th>IP</th>
+                  <th>عملیات</th>
+                </tr>
+              </thead>
+              <tbody id="employeeList">
+                <tr>
+                  <td colspan="4">⏳ در حال بارگذاری...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
@@ -319,13 +353,21 @@
 
         <label>تا تاریخ:</label>
         <input type="date" id="pollEndDateInput" name="endDate">
-        <div class="checkbox-inline" style="border-bottom: 2px solid silver;">
-          <label for="pollIsActiveInput">فعال</label>
-          <input type="checkbox" id="pollIsActiveInput" name="isActive" style="height: 18px;">
+
+
+        <div style="margin-top:10px;margin-bottom: 30px;">
+          <label>
+            <input type="checkbox" id="pollIsActiveInput" name="isActive" style="height: 18px;">
+            فعال
+          </label>
         </div>
-        <div class="checkbox-inline" style="margin-bottom: 30px;border-bottom: 2px solid silver;">
-          <label for="pollShowResultsAfterVoteInput">نمایش آمار بعد رای</label>
-          <input type="checkbox" id="pollShowResultsAfterVoteInput" name="showResultsAfterVote" style="height: 18px;" />
+
+        <div style="margin-top:10px;margin-bottom: 60px;">
+          <label>
+            <input type="checkbox" id="pollShowResultsAfterVoteInput" name="showResultsAfterVote"
+              style="height: 18px;" />
+            نمایش آمار بعد رای
+          </label>
         </div>
         <div id="pollFormLoading" class="poll-loading" style="display:none;">
           <div class="spinner"></div> در حال ارسال...
@@ -359,11 +401,19 @@
         <textarea id="newsShortText" name="shortText"></textarea>
         <label>توضیحات:</label>
         <textarea id="newsDescription" name="text"></textarea>
-        <label>فعال:</label>
-        <input type="checkbox" id="newsIsActive" name="isActive" />
-        <label>تصویر:</label>
-        <input type="file" id="newsImage" name="image" accept="image/*" />
-        <img id="newsImagePreview" style="display:none;max-width:150px;margin-top:10px;" />
+
+        <div style="margin-top:10px;margin-bottom: 30px;">
+          <label>
+            <input type="checkbox" id="newsIsActive" name="isActive" />
+            فعال
+          </label>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <label>تصویر:</label>
+          <input type="file" id="newsImage" name="image" accept="image/*" />
+          <img id="newsImagePreview" style="display:none;max-width:150px;margin-top:10px;" />
+        </div>
         <button type="submit">ذخیره</button>
       </form>
     </div>
@@ -381,11 +431,17 @@
         <textarea id="editNewsShortText" name="shortText"></textarea>
         <label>توضیحات:</label>
         <textarea id="editNewsDescription" name="text"></textarea>
-        <label>فعال:</label>
-        <input type="checkbox" id="editNewsIsActive" name="isActive" />
-        <label>تصویر جدید (اختیاری):</label>
-        <input type="file" id="editNewsImage" name="image" accept="image/*" />
-        <img id="editNewsImagePreview" style="display:none;max-width:150px;margin-top:10px;" />
+        <div style="margin-top:10px;margin-bottom: 30px;">
+          <label>
+            <input type="checkbox" id="editNewsIsActive" name="isActive" />
+            فعال
+          </label>
+        </div>
+        <div style="margin-bottom: 30px;">
+          <label>تصویر جدید (اختیاری):</label>
+          <input type="file" id="editNewsImage" name="image" accept="image/*" />
+          <img id="editNewsImagePreview" style="display:none;max-width:150px;margin-top:10px;" />
+        </div>
         <button type="submit">بروزرسانی</button>
       </form>
     </div>
@@ -479,7 +535,7 @@
     </div>
   </div>
 
-  <div id="editLinkModal" class="modal">
+  <!-- <div id="editLinkModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" data-modal-id="editLinkModal">&times;</span>
       <h3>ویرایش لینک</h3>
@@ -493,7 +549,7 @@
         <button type="submit" style="margin-top: 20px;">ذخیره تغییرات</button>
       </form>
     </div>
-  </div>
+  </div> -->
 
   <div id="deleteLinkModal" class="modal">
     <div class="modal-content">
@@ -527,9 +583,9 @@
 
         <label>نقش‌ها:</label>
         <select id="addUserRole" multiple required></select>
-        <small>برای انتخاب چند نقش، کلید Ctrl یا ⌘ را نگه دارید</small>
+        <small>برای انتخاب چند نقش، کلید Ctrl را نگه دارید</small>
 
-        <div style="margin-top:10px;">
+        <div style="margin-top:10px;margin-bottom: 30px;">
           <label>
             <input type="checkbox" id="addUserIsActive" checked />
             فعال
@@ -566,9 +622,9 @@
 
         <label>نقش‌ها:</label>
         <select id="editUserRole" multiple required></select>
-        <small>برای انتخاب چند نقش، کلید Ctrl یا ⌘ را نگه دارید</small>
+        <small>برای انتخاب چند نقش، کلید Ctrl را نگه دارید</small>
 
-        <div style="margin-top:10px;">
+        <div style="margin-top:10px;margin-bottom: 30px;">
           <label>
             <input type="checkbox" id="editUserIsActive" />
             فعال
